@@ -201,9 +201,13 @@ class Game:
     def play_until_human_or_end(self, accumulators=[], decide_fn=None):
         """Automatically plays all bot turns until a human's turn or the game ends.
         """
+        for accumulator in accumulators:
+            accumulator.before(self)
         while (
             self.winning_color() is None
             and self.state.num_turns < TURNS_LIMIT
             and self.state.current_player().is_bot
         ):
             self.play_tick(decide_fn=decide_fn, accumulators=accumulators)
+        for accumulator in accumulators:
+            accumulator.after(self)
