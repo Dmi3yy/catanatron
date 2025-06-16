@@ -1,1 +1,2 @@
 -e .[gym,web]
+requests
