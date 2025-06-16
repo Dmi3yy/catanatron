@@ -13,7 +13,6 @@ from catanatron.players.value import ValueFunctionPlayer
 from catanatron.players.minimax import AlphaBetaPlayer
 from catanatron.web.mcts_analysis import GameAnalyzer
 from catanatron.cli.accumulators import StatisticsAccumulator
-from catanatron.web.database_accumulator import StepDatabaseAccumulator
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 
@@ -102,8 +101,7 @@ def post_action_endpoint(game_id):
     statistics = None
     if autoplay or all_bots:
         stats_acc = StatisticsAccumulator()
-        db_acc = StepDatabaseAccumulator()
-        game.play_until_human_or_end(accumulators=[db_acc, stats_acc])
+        game.play_until_human_or_end(accumulators=[stats_acc])
         upsert_game_state(game)
         # Prepare statistics for response
         statistics = {

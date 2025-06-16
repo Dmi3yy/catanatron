@@ -12,6 +12,7 @@ from catanatron.state import State, apply_action
 from catanatron.state_functions import player_key, player_has_rolled
 from catanatron.models.map import CatanMap
 from catanatron.models.player import Color, Player
+from catanatron.cli.accumulators import StatisticsAccumulator
 
 # To timeout RandomRobots from getting stuck...
 TURNS_LIMIT = 1000
