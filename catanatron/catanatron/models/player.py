@@ -106,6 +106,7 @@ class WebHookPlayer(Player):
         data = {
             "color": self.color.value,
             "name": self.name,
+            "game_id": game.id,
             "game_state": game_state,
             "actions": [
                 {
