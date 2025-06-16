@@ -12,6 +12,7 @@ from catanatron.game import Game
 from catanatron.players.value import ValueFunctionPlayer
 from catanatron.players.minimax import AlphaBetaPlayer
 from catanatron.web.mcts_analysis import GameAnalyzer
+from catanatron.cli.accumulators import StatisticsAccumulator
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 
@@ -97,9 +98,19 @@ def post_action_endpoint(game_id):
     all_bots = all(p.is_bot for p in game.state.players)
 
     body_is_empty = (not request.data) or request.json is None or request.json == {}
+    statistics = None
     if autoplay or all_bots:
-        game.play_until_human_or_end()
+        stats_acc = StatisticsAccumulator()
+        game.play_until_human_or_end(accumulators=[stats_acc])
         upsert_game_state(game)
+        # Prepare statistics for response
+        statistics = {
+            "wins": dict(stats_acc.wins),
+            "turns": stats_acc.turns,
+            "ticks": stats_acc.ticks,
+            "durations": stats_acc.durations,
+            "results_by_player": {str(k): v for k, v in stats_acc.results_by_player.items()},
+        }
     elif game.state.current_player().is_bot or body_is_empty:
         game.play_tick()
         upsert_game_state(game)
@@ -108,8 +119,12 @@ def post_action_endpoint(game_id):
         game.execute(action)
         upsert_game_state(game)
 
+    response_data = json.loads(json.dumps(game, cls=GameEncoder))
+    if statistics is not None:
+        response_data["statistics"] = statistics
+
     return Response(
-        response=json.dumps(game, cls=GameEncoder),
+        response=json.dumps(response_data),
         status=200,
         mimetype="application/json",
     )
