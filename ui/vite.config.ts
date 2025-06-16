@@ -9,7 +9,13 @@ export default defineConfig({
     setupFiles: "vitest.setup.ts",
   },
   server: {
+    host: true,
     port: 3000,
-    host: true, // needed for the Docker Container port mapping to work
+    allowedHosts: ['.dmi3yy.com'],
+  },
+  preview: {
+    host: true,
+    port: 4173,
+    allowedHosts: ['.dmi3yy.com'],
   },
 });

@@ -1,5 +1,6 @@
 import random
 import builtins
+import requests
 
 from enum import Enum
 
@@ -83,3 +84,36 @@ class RandomPlayer(Player):
 
     def decide(self, game, playable_actions):
         return random.choice(playable_actions)
+
+
+class WebHookPlayer(Player):
+    """Player that makes decisions by calling an external webhook."""
+
+    def __init__(self, color, webhook_url, name="WebHookBot"):
+        super().__init__(color, is_bot=True)
+        self.webhook_url = webhook_url
+        self.name = name
+
+    def decide(self, game, playable_actions):
+        # Prepare data for webhook
+        data = {
+            "color": self.color.value,
+            "name": self.name,
+            "game_state": str(game),  # You may want to serialize this better
+            "actions": [str(a) for a in playable_actions],
+        }
+        try:
+            response = requests.post(self.webhook_url, json=data, timeout=10)
+            response.raise_for_status()
+            result = response.json()
+            idx = int(result.get("action_index", 0))
+            if 0 <= idx < len(playable_actions):
+                return playable_actions[idx]
+            else:
+                return playable_actions[0]
+        except Exception as e:
+            print(f"WebHookPlayer({self.name}): Error: {e}")
+            return playable_actions[0]
+
+    def __repr__(self):
+        return f"WebHookPlayer({self.name}):{self.color.value}"

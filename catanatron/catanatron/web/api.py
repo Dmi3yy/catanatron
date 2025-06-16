@@ -7,7 +7,7 @@ from flask import Response, Blueprint, jsonify, abort, request
 
 from catanatron.web.models import upsert_game_state, get_game_state
 from catanatron.json import GameEncoder, action_from_json
-from catanatron.models.player import Color, Player, RandomPlayer
+from catanatron.models.player import Color, Player, RandomPlayer, WebHookPlayer
 from catanatron.game import Game
 from catanatron.players.value import ValueFunctionPlayer
 from catanatron.players.minimax import AlphaBetaPlayer
@@ -27,13 +27,33 @@ def player_factory(player_key):
         raise ValueError("Invalid player key")
 
 
+def player_factory_v2(player_dict):
+    # If name matches known bots, create standard bot
+    name = player_dict["name"].upper()
+    color = Color[player_dict["color"].upper()]
+    webhook = player_dict.get("webhook")
+    if name in ("CATANATRON", "ALPHABETA"):
+        return AlphaBetaPlayer(color, 2, True)
+    elif name == "RANDOM":
+        return RandomPlayer(color)
+    elif name == "HUMAN":
+        return ValueFunctionPlayer(color, is_bot=False)
+    elif webhook:
+        return WebHookPlayer(color, webhook, name=player_dict["name"])
+    else:
+        raise ValueError(f"Unknown player type or missing webhook for custom bot: {name}")
+
+
 @bp.route("/games", methods=("POST",))
 def post_game_endpoint():
     if not request.is_json or request.json is None or "players" not in request.json:
         abort(400, description="Missing or invalid JSON body: 'players' key required")
-    player_keys = request.json["players"]
-    players = list(map(player_factory, zip(player_keys, Color)))
-
+    players_data = request.json["players"]
+    # Support old format: ["RANDOM", "HUMAN", ...]
+    if players_data and isinstance(players_data[0], str):
+        players = list(map(player_factory, zip(players_data, Color)))
+    else:
+        players = [player_factory_v2(p) for p in players_data]
     game = Game(players=players)
     upsert_game_state(game)
     return jsonify({"game_id": game.id})
