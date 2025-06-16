@@ -86,9 +86,21 @@ def post_action_endpoint(game_id):
             mimetype="application/json",
         )
 
-    # TODO: remove `or body_is_empty` when fully implement actions in FE
+    # Check for autoplay param in request (either in JSON or query)
+    autoplay = False
+    if request.is_json and request.json is not None:
+        autoplay = request.json.get("autoplay", False)
+    if not autoplay:
+        # Also allow ?autoplay=true in query string
+        autoplay = request.args.get("autoplay", "false").lower() == "true"
+    # Or if all players are bots
+    all_bots = all(p.is_bot for p in game.state.players)
+
     body_is_empty = (not request.data) or request.json is None or request.json == {}
-    if game.state.current_player().is_bot or body_is_empty:
+    if autoplay or all_bots:
+        game.play_until_human_or_end()
+        upsert_game_state(game)
+    elif game.state.current_player().is_bot or body_is_empty:
         game.play_tick()
         upsert_game_state(game)
     else:
