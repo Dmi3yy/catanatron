@@ -96,11 +96,25 @@ class WebHookPlayer(Player):
 
     def decide(self, game, playable_actions):
         # Prepare data for webhook
+        # Serialize game_state minimally for webhook (expand as needed)
+        game_state = {
+            "current_color": game.state.current_color().value if hasattr(game.state.current_color(), 'value') else game.state.current_color(),
+            "current_prompt": str(game.state.current_prompt),
+            "num_turns": game.state.num_turns,
+            "actions_count": len(game.state.actions),
+        }
         data = {
             "color": self.color.value,
             "name": self.name,
-            "game_state": str(game),  # You may want to serialize this better
-            "actions": [str(a) for a in playable_actions],
+            "game_state": game_state,
+            "actions": [
+                {
+                    "color": a.color.value if hasattr(a.color, 'value') else a.color,
+                    "action_type": a.action_type.value if hasattr(a.action_type, 'value') else a.action_type,
+                    "value": a.value,
+                }
+                for a in playable_actions
+            ],
         }
         try:
             response = requests.post(self.webhook_url, json=data, timeout=120)
