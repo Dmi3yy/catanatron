@@ -46,6 +46,21 @@ def test_post_game_endpoint(client):
         )
 
 
+def test_post_game_endpoint_with_bot_codes(client):
+    response = client.post(
+        "/api/games",
+        json={
+            "players": [
+                {"name": "AB:2", "color": "ORANGE"},
+                {"name": "G:5", "color": "BLUE"},
+            ]
+        },
+    )
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert "game_id" in data
+
+
 def test_get_game_endpoint(client):
     """Test retrieving a specific game state."""
     # First, create a game to retrieve
