@@ -75,3 +75,16 @@ def test_webhook_player_raises_on_error():
     ) as mock_post:
         with pytest.raises(requests.exceptions.Timeout):
             bot.decide(game, game.state.playable_actions)
+
+
+def test_settlement_and_city_recommendations():
+    players = [SimplePlayer(Color.RED), SimplePlayer(Color.BLUE)]
+    game = Game(players)
+    analytics = build_analytics(game, Color.RED, game.state.playable_actions)
+    assert "settlement_recommendations" in analytics
+    rec = analytics["settlement_recommendations"]
+    assert "best_positions" in rec
+    assert "analysis" in rec
+    assert "city_recommendations" in analytics
+    city = analytics["city_recommendations"]
+    assert "best_upgrades" in city
