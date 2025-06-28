@@ -13,6 +13,7 @@ from catanatron.state_functions import (
     get_largest_army,
     get_player_buildings,
 )
+from catanatron.models.map import number_probability
 
 
 def _compress_players_state(game: Any) -> Dict[str, Any]:
@@ -130,6 +131,73 @@ def _board_summary(game: Any) -> Dict[str, Any]:
     return summary
 
 
+def _score_node(board, node_id, city=False) -> Dict[str, Any]:
+    tiles = board.map.adjacent_tiles[node_id]
+    production_score = 0.0
+    resources = set()
+    for tile in tiles:
+        if tile.resource is not None:
+            production_score += number_probability(tile.number) * (2 if city else 1)
+            resources.add(tile.resource)
+    variety_bonus = len(resources) * 4 / 36
+    has_port = any(node_id in nodes for nodes in board.map.port_nodes.values())
+    port_bonus = 1 if has_port else 0
+    score = production_score + variety_bonus + port_bonus
+    return {
+        "position": node_id,
+        "score": score,
+        "production_details": {
+            "expected_production": production_score,
+            "resource_variety": len(resources),
+            "variety_bonus": variety_bonus,
+            "has_port": has_port,
+            "resources": [r.lower() for r in resources],
+        },
+        "adjacent_numbers": [
+            f"{t.number}:{t.resource}" for t in tiles if t.resource is not None
+        ],
+    }
+
+
+def _settlement_recommendations(game: Any, color) -> Dict[str, Any]:
+    board = game.state.board
+    recs = [_score_node(board, node_id) for node_id in board.buildable_node_ids(color)]
+    recs.sort(key=lambda r: r["score"], reverse=True)
+    analysis = {
+        "total_positions": len(recs),
+        "best_score": recs[0]["score"] if recs else 0,
+        "strategy": "Focus on high-probability numbers (6,8) and resource variety",
+    }
+    action_rec = {
+        "type": ActionType.BUILD_SETTLEMENT.value,
+        "value": recs[0]["position"] if recs else None,
+        "reasoning": (
+            f"Best expected production ({recs[0]['score']:.2f}) with {recs[0]['production_details']['resource_variety']} resource types"
+            if recs
+            else ""
+        ),
+    }
+    return {
+        "best_positions": recs[:5],
+        "analysis": analysis,
+        "action_recommendation": action_rec,
+    }
+
+
+def _city_recommendations(game: Any, color) -> Dict[str, Any]:
+    board = game.state.board
+    settlements = get_player_buildings(game.state, color, SETTLEMENT)
+    recs = [_score_node(board, node_id, city=True) for node_id in settlements]
+    recs.sort(key=lambda r: r["score"], reverse=True)
+    return {
+        "best_upgrades": recs[:5],
+        "analysis": {
+            "total_options": len(recs),
+            "best_score": recs[0]["score"] if recs else 0,
+        },
+    }
+
+
 def build_analytics(game: Any, my_color: Any, playable_actions: List) -> Dict[str, Any]:
     """Return a lightweight analytics dictionary for the given state."""
     players_state = _compress_players_state(game)
@@ -141,5 +209,7 @@ def build_analytics(game: Any, my_color: Any, playable_actions: List) -> Dict[st
         "players": players_state,
         "board": board,
         "available_actions": available,
+        "settlement_recommendations": _settlement_recommendations(game, my_color),
+        "city_recommendations": _city_recommendations(game, my_color),
     }
     return analytics

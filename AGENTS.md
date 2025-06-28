@@ -88,9 +88,9 @@ This repository hosts **Catanatron**, a high–performance Settlers of Catan sim
    - [x] Compressed player state (resources, VP, dev cards, buildings)
    - [x] Compressed opponents state
    - [x] Board summary (production, variety, robber, ports)
-   - [ ] Action evaluation (description, risk, strategic value)
-   - [ ] Settlement/city recommendations (production, variety, port bonus)
-   - [ ] Strategic hints (threat, position, discard risk)
+  - [x] Action evaluation (description, risk, strategic value)
+  - [x] Settlement/city recommendations (production, variety, port bonus)
+  - [ ] Strategic hints (threat, position, discard risk)
 
 4. **Add AI/bot recommendations**
    - [ ] Call AlphaBeta/MCTS at depth 1-2 for action evaluation
