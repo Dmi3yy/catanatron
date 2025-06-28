@@ -14,8 +14,8 @@ EXP_C = 2**0.5
 
 
 class MCTSPlayer(Player):
-    def __init__(self, color, num_simulations=SIMULATIONS, prunning=False):
-        super().__init__(color)
+    def __init__(self, color, num_simulations=SIMULATIONS, prunning=False, name=None):
+        super().__init__(color, name=name)
         self.num_simulations = int(num_simulations)
         self.prunning = bool(prunning)
 

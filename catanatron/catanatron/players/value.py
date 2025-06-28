@@ -149,9 +149,9 @@ class ValueFunctionPlayer(Player):
     """
 
     def __init__(
-        self, color, value_fn_builder_name=None, params=None, is_bot=True, epsilon=None
+        self, color, value_fn_builder_name=None, params=None, is_bot=True, epsilon=None, name=None
     ):
-        super().__init__(color, is_bot)
+        super().__init__(color, is_bot, name=name)
         self.value_fn_builder_name = (
             "contender_fn" if value_fn_builder_name == "C" else "base_fn"
         )

@@ -33,8 +33,9 @@ class AlphaBetaPlayer(Player):
         value_fn_builder_name=None,
         params=DEFAULT_WEIGHTS,
         epsilon=None,
+        name=None,
     ):
-        super().__init__(color)
+        super().__init__(color, name=name)
         self.depth = int(depth)
         self.prunning = str(prunning).lower() != "false"
         self.value_fn_builder_name = (
@@ -228,6 +229,9 @@ class SameTurnAlphaBetaPlayer(AlphaBetaPlayer):
     """
     Same like AlphaBeta but only within turn
     """
+
+    def __init__(self, *args, name=None, **kwargs):
+        super().__init__(*args, name=name, **kwargs)
 
     def alphabeta(self, game, depth, alpha, beta, deadline, node):
         """AlphaBeta MiniMax Algorithm.
