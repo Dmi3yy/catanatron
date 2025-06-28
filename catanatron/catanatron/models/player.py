@@ -4,6 +4,8 @@ import requests
 import os
 import time
 
+from catanatron.analytics import build_analytics
+
 from enum import Enum
 
 
@@ -104,11 +106,17 @@ class WebHookPlayer(Player):
         self.webhook_url = webhook_url
 
     def decide(self, game, playable_actions):
-        print(f"[WEBHOOK DECIDE] game_id={game.id} turn={game.state.num_turns} color={self.color} name={self.name} pid={os.getpid()} time={time.time()}")
+        print(
+            f"[WEBHOOK DECIDE] game_id={game.id} turn={game.state.num_turns} color={self.color} name={self.name} pid={os.getpid()} time={time.time()}"
+        )
         # Prepare data for webhook
         # Serialize game_state minimally for webhook (expand as needed)
         game_state = {
-            "current_color": game.state.current_color().value if hasattr(game.state.current_color(), 'value') else game.state.current_color(),
+            "current_color": (
+                game.state.current_color().value
+                if hasattr(game.state.current_color(), "value")
+                else game.state.current_color()
+            ),
             "current_prompt": str(game.state.current_prompt),
             "num_turns": game.state.num_turns,
             "actions_count": len(game.state.actions),
@@ -118,10 +126,15 @@ class WebHookPlayer(Player):
             "name": self.name,
             "game_id": game.id,
             "game_state": game_state,
+            "analytics": build_analytics(game, self.color, playable_actions),
             "actions": [
                 {
-                    "color": a.color.value if hasattr(a.color, 'value') else a.color,
-                    "action_type": a.action_type.value if hasattr(a.action_type, 'value') else a.action_type,
+                    "color": a.color.value if hasattr(a.color, "value") else a.color,
+                    "action_type": (
+                        a.action_type.value
+                        if hasattr(a.action_type, "value")
+                        else a.action_type
+                    ),
                     "value": a.value,
                 }
                 for a in playable_actions
