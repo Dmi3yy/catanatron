@@ -5,6 +5,8 @@ Contains Game class which is a thin-wrapper around the State class.
 import uuid
 import random
 import sys
+import os
+import time
 from typing import Sequence, Union, Optional
 
 from catanatron.models.enums import Action, ActionPrompt, ActionType
@@ -15,6 +17,9 @@ from catanatron.models.player import Color, Player
 
 # To timeout RandomRobots from getting stuck...
 TURNS_LIMIT = 1000
+
+LOCK_TIMEOUT = 300  # 5 хвилин
+LOCK_DIR = "/tmp"
 
 
 def is_valid_action(state, action):
@@ -135,42 +140,24 @@ class Game:
         return self.winning_color()
 
     def play_tick(self, decide_fn=None, accumulators=[]):
-        """Advances game by one ply (player decision).
+        """Advances game by one ply (player decision)."""
+        lockfile = acquire_lock(self.id)
+        try:
+            player = self.state.current_player()
+            actions = self.state.playable_actions
 
-        Args:
-            decide_fn (function, optional): Function to overwrite current player's decision with.
-                Defaults to None.
-
-        Returns:
-            Action: Final action (modified to be used as Log)
-        """
-        player = self.state.current_player()
-        actions = self.state.playable_actions
-
-        action = (
-            decide_fn(player, self, actions)
-            if decide_fn is not None
-            else player.decide(self, actions)
-        )
-        # Call accumulator.step here, because we want game_before_action, action
-        if len(accumulators) > 0:
-            for accumulator in accumulators:
-                accumulator.step(self, action)
-        result = self.execute(action)
-        # Internal curl call to trigger next step if game is not finished
-#         if self.winning_color() is None and self.state.num_turns < TURNS_LIMIT:
-#             import subprocess
-#             try:
-#                 subprocess.Popen([
-#                     "curl",
-#                     "-X", "POST",
-#                     f"http://127.0.0.1:5001/api/games/{self.id}/actions",
-#                     "-H", "Content-Type: application/json",
-#                     "-d", "{}"
-#                 ])
-#             except Exception as e:
-#                 print(f"Failed to trigger next step: {e}")
-        return result
+            action = (
+                decide_fn(player, self, actions)
+                if decide_fn is not None
+                else player.decide(self, actions)
+            )
+            if len(accumulators) > 0:
+                for accumulator in accumulators:
+                    accumulator.step(self, action)
+            result = self.execute(action)
+            return result
+        finally:
+            release_lock(lockfile)
 
     def execute(self, action: Action, validate_action: bool = True) -> Action:
         """Internal call that carries out decided action by player"""
@@ -211,3 +198,19 @@ class Game:
         game_copy.vps_to_win = self.vps_to_win
         game_copy.state = self.state.copy()
         return game_copy
+
+
+def acquire_lock(game_id, timeout=LOCK_TIMEOUT):
+    lockfile = os.path.join(LOCK_DIR, f"catanatron_{game_id}.lock")
+    start = time.time()
+    while os.path.exists(lockfile):
+        if time.time() - start > timeout:
+            raise Exception("Timeout waiting for lock")
+        time.sleep(0.1)
+    with open(lockfile, "w") as f:
+        f.write(str(os.getpid()))
+    return lockfile
+
+def release_lock(lockfile):
+    if os.path.exists(lockfile):
+        os.remove(lockfile)
