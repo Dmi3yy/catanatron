@@ -21,6 +21,11 @@ def test_build_analytics_basic():
     assert "robber" in analytics["board"]
     assert Color.RED.value in analytics["board"]["players"]
     assert "expected_production" in analytics["board"]["players"][Color.RED.value]
+    assert "resources_count" in analytics["players"][Color.RED.value]
+    assert "threat_level" in analytics["players"][Color.RED.value]
+    first_action = analytics["available_actions"][0]
+    assert "risk_level" in first_action
+    assert "strategic_value" in first_action
 
 
 def test_webhook_player_sends_analytics():
