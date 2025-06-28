@@ -70,7 +70,7 @@ def _player_board_stats(game: Any, color) -> Dict[str, Any]:
     accessible_ports = []
     for res, nodes in board.map.port_nodes.items():
         if any(n in nodes for n in settlements + cities):
-            accessible_ports.append(res.value if res else "3:1")
+            accessible_ports.append(res if res else "3:1")
 
     return {
         "expected_production": sum(prod_counter.values()),
