@@ -11,6 +11,8 @@ from catanatron.models.player import Color, Player, RandomPlayer, WebHookPlayer
 from catanatron.game import Game
 from catanatron.players.value import ValueFunctionPlayer
 from catanatron.players.minimax import AlphaBetaPlayer
+from catanatron.cli.cli_players import CLI_PLAYERS
+import re
 from catanatron.web.mcts_analysis import GameAnalyzer
 
 bp = Blueprint("api", __name__, url_prefix="/api")
@@ -31,16 +33,35 @@ def player_factory_v2(player_dict):
     name = player_dict.get("name") or "Player"
     color = Color[player_dict["color"].upper()]
     webhook = player_dict.get("webhook")
-    if name.upper() in ("CATANATRON", "ALPHABETA"):
-        return AlphaBetaPlayer(color, 2, True, name=name)
-    elif name.upper() == "RANDOM":
-        return RandomPlayer(color, name=name)
-    elif name.upper() == "HUMAN":
-        return ValueFunctionPlayer(color, is_bot=False, name=name)
-    elif webhook:
+
+    # WebHook player takes precedence
+    if webhook:
         return WebHookPlayer(color, webhook, name=name)
+
+    upper = name.upper()
+    parts = upper.split(":")
+    code = parts[0]
+    params = parts[1:]
+
+    match = re.match(r"([A-Z]+)(\d+)$", code)
+    if match:
+        code = match.group(1)
+        params = [match.group(2)] + params
+
+    for cli_player in CLI_PLAYERS:
+        if cli_player.code == code:
+            return cli_player.import_fn(color, *params, name=name)
+
+    if upper in ("CATANATRON", "ALPHABETA"):
+        return AlphaBetaPlayer(color, 2, True, name=name)
+    elif upper == "RANDOM":
+        return RandomPlayer(color, name=name)
+    elif upper == "HUMAN":
+        return ValueFunctionPlayer(color, is_bot=False, name=name)
     else:
-        raise ValueError(f"Unknown player type or missing webhook for custom bot: {name}")
+        raise ValueError(
+            f"Unknown player type or missing webhook for custom bot: {name}"
+        )
 
 
 @bp.route("/games", methods=("POST",))
