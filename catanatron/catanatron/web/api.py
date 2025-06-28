@@ -28,18 +28,17 @@ def player_factory(player_key):
 
 
 def player_factory_v2(player_dict):
-    # If name matches known bots, create standard bot
-    name = player_dict["name"].upper()
+    name = player_dict.get("name") or "Player"
     color = Color[player_dict["color"].upper()]
     webhook = player_dict.get("webhook")
-    if name in ("CATANATRON", "ALPHABETA"):
-        return AlphaBetaPlayer(color, 2, True)
-    elif name == "RANDOM":
-        return RandomPlayer(color)
-    elif name == "HUMAN":
-        return ValueFunctionPlayer(color, is_bot=False)
+    if name.upper() in ("CATANATRON", "ALPHABETA"):
+        return AlphaBetaPlayer(color, 2, True, name=name)
+    elif name.upper() == "RANDOM":
+        return RandomPlayer(color, name=name)
+    elif name.upper() == "HUMAN":
+        return ValueFunctionPlayer(color, is_bot=False, name=name)
     elif webhook:
-        return WebHookPlayer(color, webhook, name=player_dict["name"])
+        return WebHookPlayer(color, webhook, name=name)
     else:
         raise ValueError(f"Unknown player type or missing webhook for custom bot: {name}")
 

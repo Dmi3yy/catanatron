@@ -22,15 +22,17 @@ class Player:
     the database via pickle.
     """
 
-    def __init__(self, color, is_bot=True):
+    def __init__(self, color, is_bot=True, name=None):
         """Initialize the player
 
         Args:
             color(Color): the color of the player
             is_bot(bool): whether the player is controlled by the computer
+            name(str): the name of the player
         """
         self.color = color
         self.is_bot = is_bot
+        self.name = name if name is not None else type(self).__name__
 
     def decide(self, game, playable_actions):
         """Should return one of the playable_actions or
@@ -47,11 +49,14 @@ class Player:
         pass
 
     def __repr__(self):
-        return f"{type(self).__name__}:{self.color.value}"
+        return f"{self.name}:{self.color.value}"
 
 
 class SimplePlayer(Player):
     """Simple AI player that always takes the first action in the list of playable_actions"""
+
+    def __init__(self, color, name=None):
+        super().__init__(color, is_bot=True, name=name)
 
     def decide(self, game, playable_actions):
         return playable_actions[0]
@@ -60,8 +65,8 @@ class SimplePlayer(Player):
 class HumanPlayer(Player):
     """Human player that selects which action to take using standard input"""
 
-    def __init__(self, color, is_bot=False, input_fn=builtins.input):
-        super().__init__(color, is_bot)
+    def __init__(self, color, is_bot=False, input_fn=builtins.input, name=None):
+        super().__init__(color, is_bot, name=name)
         self.input_fn = input_fn  # this is for testing purposes
 
     def decide(self, game, playable_actions):
@@ -82,6 +87,9 @@ class HumanPlayer(Player):
 class RandomPlayer(Player):
     """Random AI player that selects an action randomly from the list of playable_actions"""
 
+    def __init__(self, color, name=None):
+        super().__init__(color, is_bot=True, name=name)
+
     def decide(self, game, playable_actions):
         return random.choice(playable_actions)
 
@@ -90,9 +98,8 @@ class WebHookPlayer(Player):
     """Player that makes decisions by calling an external webhook."""
 
     def __init__(self, color, webhook_url, name="WebHookBot"):
-        super().__init__(color, is_bot=True)
+        super().__init__(color, is_bot=True, name=name)
         self.webhook_url = webhook_url
-        self.name = name
 
     def decide(self, game, playable_actions):
         # Prepare data for webhook
