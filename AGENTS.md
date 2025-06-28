@@ -79,15 +79,15 @@ This repository hosts **Catanatron**, a high–performance Settlers of Catan sim
 ## Roadmap
 
 1. **Create analytics module**
-   - [ ] Add `catanatron/catanatron/analytics.py` with `build_analytics(game, my_color, playable_actions)`
+   - [x] Add `catanatron/catanatron/analytics.py` with `build_analytics(game, my_color, playable_actions)`
 
 2. **Integrate analytics into WebHookPlayer**
-   - [ ] Add `analytics` field to the JSON sent to the webhook
+   - [x] Add `analytics` field to the JSON sent to the webhook
 
 3. **Implement basic analytics**
-   - [ ] Compressed player state (resources, VP, dev cards, buildings)
-   - [ ] Compressed opponents state
-   - [ ] Board summary (production, variety, robber, ports)
+   - [x] Compressed player state (resources, VP, dev cards, buildings)
+   - [x] Compressed opponents state
+   - [x] Board summary (production, variety, robber, ports)
    - [ ] Action evaluation (description, risk, strategic value)
    - [ ] Settlement/city recommendations (production, variety, port bonus)
    - [ ] Strategic hints (threat, position, discard risk)

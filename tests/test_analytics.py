@@ -15,6 +15,10 @@ def test_build_analytics_basic():
     assert "available_actions" in analytics
     assert len(analytics["available_actions"]) == len(actions)
     assert analytics["players"][Color.RED.value]["victory_points"] >= 0
+    # board summary should include robber and per-player info
+    assert "robber" in analytics["board"]
+    assert Color.RED.value in analytics["board"]["players"]
+    assert "expected_production" in analytics["board"]["players"][Color.RED.value]
 
 
 def test_webhook_player_sends_analytics():
