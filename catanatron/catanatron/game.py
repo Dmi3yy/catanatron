@@ -158,18 +158,18 @@ class Game:
                 accumulator.step(self, action)
         result = self.execute(action)
         # Internal curl call to trigger next step if game is not finished
-        if self.winning_color() is None and self.state.num_turns < TURNS_LIMIT:
-            import subprocess
-            try:
-                subprocess.Popen([
-                    "curl",
-                    "-X", "POST",
-                    f"http://127.0.0.1:5001/api/games/{self.id}/actions",
-                    "-H", "Content-Type: application/json",
-                    "-d", "{}"
-                ])
-            except Exception as e:
-                print(f"Failed to trigger next step: {e}")
+#         if self.winning_color() is None and self.state.num_turns < TURNS_LIMIT:
+#             import subprocess
+#             try:
+#                 subprocess.Popen([
+#                     "curl",
+#                     "-X", "POST",
+#                     f"http://127.0.0.1:5001/api/games/{self.id}/actions",
+#                     "-H", "Content-Type: application/json",
+#                     "-d", "{}"
+#                 ])
+#             except Exception as e:
+#                 print(f"Failed to trigger next step: {e}")
         return result
 
     def execute(self, action: Action, validate_action: bool = True) -> Action:

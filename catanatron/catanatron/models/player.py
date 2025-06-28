@@ -118,7 +118,7 @@ class WebHookPlayer(Player):
             ],
         }
         try:
-            response = requests.post(self.webhook_url, json=data, timeout=120)
+            response = requests.post(self.webhook_url, json=data, timeout=300)
             response.raise_for_status()
             result = response.json()
             idx = int(result.get("action_index", 0))
