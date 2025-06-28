@@ -213,6 +213,7 @@ def acquire_lock(game_id, timeout=LOCK_TIMEOUT):
     print(f"[LOCK ACQUIRED] {game_id} pid={os.getpid()} time={time.time()}")
     return lockfile
 
+
 def release_lock(lockfile):
     if os.path.exists(lockfile):
         os.remove(lockfile)

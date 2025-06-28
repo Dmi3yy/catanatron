@@ -77,7 +77,9 @@ class GameEncoder(json.JSONEncoder):
                         "direction": self.default(direction),
                         "color": self.default(color),
                     }
-            player_names = {p.color.value: p.name for p in getattr(obj.state, 'players', [])}
+            player_names = {
+                p.color.value: p.name for p in getattr(obj.state, "players", [])
+            }
             return {
                 "tiles": [
                     {"coordinate": coordinate, "tile": self.default(tile)}

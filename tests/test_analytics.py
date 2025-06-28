@@ -1,4 +1,6 @@
 from unittest.mock import patch, MagicMock
+import pytest
+import requests
 
 from catanatron.analytics import build_analytics
 from catanatron.game import Game
@@ -38,3 +40,33 @@ def test_webhook_player_sends_analytics():
         sent = mock_post.call_args.kwargs["json"]
         assert "analytics" in sent
         assert "available_actions" in sent["analytics"]
+
+
+def test_webhook_player_uses_five_minute_timeout():
+    bot = WebHookPlayer(Color.RED, "http://example.com")
+    other = SimplePlayer(Color.BLUE)
+    game = Game([bot, other])
+
+    mock_resp = MagicMock()
+    mock_resp.json.return_value = {"action_index": 0}
+    mock_resp.raise_for_status.return_value = None
+
+    with patch(
+        "catanatron.models.player.requests.post", return_value=mock_resp
+    ) as mock_post:
+        bot.decide(game, game.state.playable_actions)
+        assert mock_post.called
+        assert mock_post.call_args.kwargs.get("timeout") == 300
+
+
+def test_webhook_player_raises_on_error():
+    bot = WebHookPlayer(Color.RED, "http://example.com")
+    other = SimplePlayer(Color.BLUE)
+    game = Game([bot, other])
+
+    with patch(
+        "catanatron.models.player.requests.post",
+        side_effect=requests.exceptions.Timeout,
+    ) as mock_post:
+        with pytest.raises(requests.exceptions.Timeout):
+            bot.decide(game, game.state.playable_actions)

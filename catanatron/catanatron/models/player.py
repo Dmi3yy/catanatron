@@ -151,7 +151,7 @@ class WebHookPlayer(Player):
                 return playable_actions[0]
         except Exception as e:
             print(f"WebHookPlayer({self.name}): Error: {e}")
-            return playable_actions[0]
+            raise
 
     def __repr__(self):
         return f"WebHookPlayer({self.name}):{self.color.value}"
