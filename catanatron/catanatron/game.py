@@ -205,12 +205,15 @@ def acquire_lock(game_id, timeout=LOCK_TIMEOUT):
     start = time.time()
     while os.path.exists(lockfile):
         if time.time() - start > timeout:
+            print(f"[LOCK TIMEOUT] {game_id} pid={os.getpid()} time={time.time()}")
             raise Exception("Timeout waiting for lock")
         time.sleep(0.1)
     with open(lockfile, "w") as f:
         f.write(str(os.getpid()))
+    print(f"[LOCK ACQUIRED] {game_id} pid={os.getpid()} time={time.time()}")
     return lockfile
 
 def release_lock(lockfile):
     if os.path.exists(lockfile):
         os.remove(lockfile)
+        print(f"[LOCK RELEASED] {lockfile} pid={os.getpid()} time={time.time()}")

@@ -1,6 +1,8 @@
 import random
 import builtins
 import requests
+import os
+import time
 
 from enum import Enum
 
@@ -102,6 +104,7 @@ class WebHookPlayer(Player):
         self.webhook_url = webhook_url
 
     def decide(self, game, playable_actions):
+        print(f"[WEBHOOK DECIDE] game_id={game.id} turn={game.state.num_turns} color={self.color} name={self.name} pid={os.getpid()} time={time.time()}")
         # Prepare data for webhook
         # Serialize game_state minimally for webhook (expand as needed)
         game_state = {
