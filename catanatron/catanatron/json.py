@@ -77,6 +77,7 @@ class GameEncoder(json.JSONEncoder):
                         "direction": self.default(direction),
                         "color": self.default(color),
                     }
+            player_names = {p.color.value: p.name for p in getattr(obj.state, 'players', [])}
             return {
                 "tiles": [
                     {"coordinate": coordinate, "tile": self.default(tile)}
@@ -100,6 +101,7 @@ class GameEncoder(json.JSONEncoder):
                 "current_playable_actions": obj.state.playable_actions,
                 "longest_roads_by_player": longest_roads_by_player(obj.state),
                 "winning_color": obj.winning_color(),
+                "player_names": player_names,
             }
         if isinstance(obj, Water):
             return {"type": "WATER"}
