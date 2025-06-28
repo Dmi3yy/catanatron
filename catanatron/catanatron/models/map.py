@@ -337,49 +337,70 @@ def initialize_tiles(
     Returns:
         Dict[Coordinate, Tile]: Coordinate to initialized Tile mapping.
     """
-    shuffled_port_resources = shuffled_port_resources_param or random.sample(
-        map_template.port_resources, len(map_template.port_resources)
-    )
-    shuffled_tile_resources = shuffled_tile_resources_param or random.sample(
-        map_template.tile_resources, len(map_template.tile_resources)
-    )
-    shuffled_numbers = shuffled_numbers_param or random.sample(
-        map_template.numbers, len(map_template.numbers)
-    )
+    from catanatron.models.coordinate_system import UNIT_VECTORS, Direction, add
+    
+    def has_adjacent_6_8(tiles: Dict[Coordinate, Tile]):
+        # Перевіряє, чи є сусідні LandTile з номерами 6 і 8
+        for coord, tile in tiles.items():
+            if not isinstance(tile, LandTile):
+                continue
+            if tile.number not in (6, 8):
+                continue
+            for d in Direction:
+                neighbor_coord = add(coord, UNIT_VECTORS[d])
+                neighbor = tiles.get(neighbor_coord)
+                if neighbor and isinstance(neighbor, LandTile):
+                    if neighbor.number in (6, 8) and neighbor.number != tile.number:
+                        return True
+        return False
 
-    # for each topology entry, place a tile. keep track of nodes and edges
-    all_tiles: Dict[Coordinate, Tile] = {}
-    node_autoinc = 0
-    tile_autoinc = 0
-    port_autoinc = 0
-    for coordinate, tile_type in map_template.topology.items():
-        nodes, edges, node_autoinc = get_nodes_and_edges(
-            all_tiles, coordinate, node_autoinc
+    while True:
+        shuffled_port_resources = shuffled_port_resources_param or random.sample(
+            map_template.port_resources, len(map_template.port_resources)
+        )
+        shuffled_tile_resources = shuffled_tile_resources_param or random.sample(
+            map_template.tile_resources, len(map_template.tile_resources)
+        )
+        shuffled_numbers = shuffled_numbers_param or random.sample(
+            map_template.numbers, len(map_template.numbers)
         )
 
-        # create and save tile
-        if isinstance(tile_type, tuple):  # is port
-            (_, direction) = tile_type
-            port = Port(
-                port_autoinc, shuffled_port_resources.pop(), direction, nodes, edges
+        all_tiles: Dict[Coordinate, Tile] = {}
+        node_autoinc = 0
+        tile_autoinc = 0
+        port_autoinc = 0
+        numbers_copy = list(shuffled_numbers)
+        resources_copy = list(shuffled_tile_resources)
+        ports_copy = list(shuffled_port_resources)
+        for coordinate, tile_type in map_template.topology.items():
+            nodes, edges, node_autoinc = get_nodes_and_edges(
+                all_tiles, coordinate, node_autoinc
             )
-            all_tiles[coordinate] = port
-            port_autoinc += 1
-        elif tile_type == LandTile:
-            resource = shuffled_tile_resources.pop()
-            if resource != None:
-                number = shuffled_numbers.pop()
-                tile = LandTile(tile_autoinc, resource, number, nodes, edges)
-            else:
-                tile = LandTile(tile_autoinc, None, None, nodes, edges)  # desert
-            all_tiles[coordinate] = tile
-            tile_autoinc += 1
-        elif tile_type == Water:
-            water_tile = Water(nodes, edges)
-            all_tiles[coordinate] = water_tile
-        else:
-            raise ValueError("Invalid tile")
 
+            if isinstance(tile_type, tuple):  # is port
+                (_, direction) = tile_type
+                port = Port(
+                    port_autoinc, ports_copy.pop(), direction, nodes, edges
+                )
+                all_tiles[coordinate] = port
+                port_autoinc += 1
+            elif tile_type == LandTile:
+                resource = resources_copy.pop()
+                if resource != None:
+                    number = numbers_copy.pop()
+                    tile = LandTile(tile_autoinc, resource, number, nodes, edges)
+                else:
+                    tile = LandTile(tile_autoinc, None, None, nodes, edges)  # desert
+                all_tiles[coordinate] = tile
+                tile_autoinc += 1
+            elif tile_type == Water:
+                water_tile = Water(nodes, edges)
+                all_tiles[coordinate] = water_tile
+            else:
+                raise ValueError("Invalid tile")
+
+        if not has_adjacent_6_8(all_tiles):
+            break
     return all_tiles
 
 
