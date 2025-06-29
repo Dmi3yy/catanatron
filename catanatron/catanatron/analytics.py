@@ -198,6 +198,36 @@ def _city_recommendations(game: Any, color) -> Dict[str, Any]:
     }
 
 
+def _strategic_analysis(game: Any, my_color) -> Dict[str, Any]:
+    state = game.state
+    my_vp = get_actual_victory_points(state, my_color)
+    opponent_vps = [
+        get_actual_victory_points(state, c) for c in state.colors if c != my_color
+    ]
+    max_opp = max(opponent_vps) if opponent_vps else 0
+    if max_opp >= 8:
+        threat = "HIGH"
+    elif max_opp >= 6:
+        threat = "MEDIUM"
+    else:
+        threat = "LOW"
+
+    ranking = sorted(
+        state.colors,
+        key=lambda c: get_actual_victory_points(state, c),
+        reverse=True,
+    )
+    position = ranking.index(my_color) + 1
+
+    discard_risk = player_num_resource_cards(state, my_color) > state.discard_limit
+
+    return {
+        "threat": threat,
+        "position": position,
+        "discard_risk": discard_risk,
+    }
+
+
 def build_analytics(game: Any, my_color: Any, playable_actions: List) -> Dict[str, Any]:
     """Return a lightweight analytics dictionary for the given state."""
     players_state = _compress_players_state(game)
@@ -211,5 +241,6 @@ def build_analytics(game: Any, my_color: Any, playable_actions: List) -> Dict[st
         "available_actions": available,
         "settlement_recommendations": _settlement_recommendations(game, my_color),
         "city_recommendations": _city_recommendations(game, my_color),
+        "strategic_analysis": _strategic_analysis(game, my_color),
     }
     return analytics
