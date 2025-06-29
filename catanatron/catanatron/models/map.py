@@ -338,7 +338,7 @@ def initialize_tiles(
         Dict[Coordinate, Tile]: Coordinate to initialized Tile mapping.
     """
     from catanatron.models.coordinate_system import UNIT_VECTORS, Direction, add
-    
+
     def has_adjacent_6_8(tiles: Dict[Coordinate, Tile]):
         # Перевіряє, чи є сусідні LandTile з номерами 6 і 8
         for coord, tile in tiles.items():
@@ -379,9 +379,7 @@ def initialize_tiles(
 
             if isinstance(tile_type, tuple):  # is port
                 (_, direction) = tile_type
-                port = Port(
-                    port_autoinc, ports_copy.pop(), direction, nodes, edges
-                )
+                port = Port(port_autoinc, ports_copy.pop(), direction, nodes, edges)
                 all_tiles[coordinate] = port
                 port_autoinc += 1
             elif tile_type == LandTile:
