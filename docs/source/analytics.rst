@@ -33,6 +33,10 @@ these top‑level keys:
     High level hints such as current ranking and discard risk.
 ``bot_predictions``
     Top‑2 moves predicted by a shallow AlphaBeta search.
+``action_history``
+    List of the last few actions executed in the game.
+``advanced_hints``
+    Additional strategic tips such as proximity to longest road or largest army.
 
 Example
 -------
@@ -80,6 +84,8 @@ An abbreviated example of the analytics payload::
         "strategic_analysis": {"threat": "LOW", "position": 1, "discard_risk": false},
         "bot_predictions": [
             {"type": "END_TURN", "score": 0.0, "risk_level": "low", "strategic_value": "low", "description": "End current turn"}
-        ]
+        ],
+        "action_history": [],
+        "advanced_hints": []
     }
 

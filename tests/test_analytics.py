@@ -98,3 +98,7 @@ def test_settlement_and_city_recommendations():
     assert "city_recommendations" in analytics
     city = analytics["city_recommendations"]
     assert "best_upgrades" in city
+    assert "action_history" in analytics
+    assert isinstance(analytics["action_history"], list)
+    assert "advanced_hints" in analytics
+    assert isinstance(analytics["advanced_hints"], list)

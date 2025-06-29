@@ -101,9 +101,9 @@ This repository hosts **Catanatron**, a high–performance Settlers of Catan sim
    - [x] Describe the `analytics` field structure for frontend/bots
 
 6. **Extensions**
-   - [ ] Add heatmap/tensor features for the board (optional)
+   - [x] Add heatmap/tensor features for the board (optional)
    - [ ] Add action history, advanced strategic hints
-   - [ ] Allow specifying bot codes like `AB:2` or `G:10` in the `POST /api/games` JSON payload
+   - [x] Allow specifying bot codes like `AB:2` or `G:10` in the `POST /api/games` JSON payload
 
 ---
 
