@@ -26,9 +26,12 @@ def test_build_analytics_basic():
     first_action = analytics["available_actions"][0]
     assert "risk_level" in first_action
     assert "strategic_value" in first_action
+    assert "score" in first_action
     assert "strategic_analysis" in analytics
     sa = analytics["strategic_analysis"]
     assert {"threat", "position", "discard_risk"}.issubset(sa)
+    assert "bot_predictions" in analytics
+    assert len(analytics["bot_predictions"]) <= 2
 
 
 def test_webhook_player_sends_analytics():

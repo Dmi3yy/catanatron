@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import Counter
 from typing import Any, Dict, List
+import time
 
 from catanatron.models.enums import ActionType, SETTLEMENT, CITY
 from catanatron.state_functions import (
@@ -228,13 +229,35 @@ def _strategic_analysis(game: Any, my_color) -> Dict[str, Any]:
     }
 
 
+def _bot_evaluations(game: Any, my_color, depth: int = 1):
+    """Return action scores and top predicted moves using AlphaBeta search."""
+    from catanatron.players.minimax import AlphaBetaPlayer, DebugStateNode
+
+    player = AlphaBetaPlayer(my_color, depth=depth, prunning=True)
+    root = DebugStateNode("root", my_color)
+    deadline = time.time() + 5
+    player.alphabeta(game.copy(), depth, float("-inf"), float("inf"), deadline, root)
+    scores = {child.action: child.expected_value for child in root.children}
+    ranked = sorted(root.children, key=lambda c: c.expected_value, reverse=True)
+    predictions = [
+        {**_evaluate_action(c.action), "score": c.expected_value} for c in ranked[:2]
+    ]
+    return scores, predictions
+
+
 def build_analytics(game: Any, my_color: Any, playable_actions: List) -> Dict[str, Any]:
     """Return a lightweight analytics dictionary for the given state."""
     players_state = _compress_players_state(game)
     board = _board_summary(game)
     board["longest_road_color"] = get_longest_road_color(game.state)
     board["largest_army_color"] = get_largest_army(game.state)[0]
-    available = [_evaluate_action(a) for a in playable_actions]
+    action_scores, predictions = _bot_evaluations(game, my_color, depth=1)
+    available = []
+    for a in playable_actions:
+        desc = _evaluate_action(a)
+        if a in action_scores:
+            desc["score"] = action_scores[a]
+        available.append(desc)
     analytics = {
         "players": players_state,
         "board": board,
@@ -242,5 +265,6 @@ def build_analytics(game: Any, my_color: Any, playable_actions: List) -> Dict[st
         "settlement_recommendations": _settlement_recommendations(game, my_color),
         "city_recommendations": _city_recommendations(game, my_color),
         "strategic_analysis": _strategic_analysis(game, my_color),
+        "bot_predictions": predictions,
     }
     return analytics
