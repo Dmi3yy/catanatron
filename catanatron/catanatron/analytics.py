@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import Counter
 from typing import Any, Dict, List
+
 import time
 
 from catanatron.models.enums import ActionType, SETTLEMENT, CITY
@@ -130,6 +131,14 @@ def _board_summary(game: Any) -> Dict[str, Any]:
         per_player[color.value] = _player_board_stats(game, color)
     summary["players"] = per_player
     return summary
+
+
+def _board_tensor(game: Any, color) -> List[List[List[float]]]:
+    """Return board tensor as nested lists for JSON serialization."""
+    from catanatron.gym.board_tensor_features import create_board_tensor
+
+    tensor = create_board_tensor(game, color)
+    return tensor.tolist()
 
 
 def _score_node(board, node_id, city=False) -> Dict[str, Any]:
@@ -268,6 +277,7 @@ def build_analytics(game: Any, my_color: Any, playable_actions: List) -> Dict[st
     analytics = {
         "players": players_state,
         "board": board,
+        "board_tensor": _board_tensor(game, my_color),
         "available_actions": available,
         "settlement_recommendations": _settlement_recommendations(game, my_color),
         "city_recommendations": _city_recommendations(game, my_color),
