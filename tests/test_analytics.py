@@ -14,6 +14,7 @@ def test_build_analytics_basic():
     analytics = build_analytics(game, Color.RED, actions)
     assert "players" in analytics
     assert "board" in analytics
+    assert "board_tensor" in analytics
     assert "available_actions" in analytics
     assert len(analytics["available_actions"]) == len(actions)
     assert analytics["players"][Color.RED.value]["victory_points"] >= 0
@@ -50,6 +51,7 @@ def test_webhook_player_sends_analytics():
         assert mock_post.called
         sent = mock_post.call_args.kwargs["json"]
         assert "analytics" in sent
+        assert "board_tensor" in sent["analytics"]
         assert "available_actions" in sent["analytics"]
 
 
@@ -88,6 +90,7 @@ def test_settlement_and_city_recommendations():
     players = [SimplePlayer(Color.RED), SimplePlayer(Color.BLUE)]
     game = Game(players)
     analytics = build_analytics(game, Color.RED, game.state.playable_actions)
+    assert "board_tensor" in analytics
     assert "settlement_recommendations" in analytics
     rec = analytics["settlement_recommendations"]
     assert "best_positions" in rec

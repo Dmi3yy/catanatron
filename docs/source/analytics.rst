@@ -17,6 +17,9 @@ these top‑level keys:
 ``board``
     Global board information. Includes robber position, player production stats
     and which player holds the longest road or largest army.
+``board_tensor``
+    3‑D matrix representing the board state as used for machine learning
+    experiments. The tensor is returned as nested lists.
 ``available_actions``
     List of the playable actions for the current turn. Each action description
     contains a human readable ``description``, ``strategic_value``, ``risk_level``
@@ -56,6 +59,7 @@ An abbreviated example of the analytics payload::
                 }
             }
         },
+        "board_tensor": [[...]],
         "available_actions": [
             {
                 "type": "ROLL",
