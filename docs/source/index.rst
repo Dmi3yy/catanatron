@@ -96,6 +96,7 @@ API Reference
 
    catanatron
    catanatron.gym
+   analytics
 
 
 
