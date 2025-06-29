@@ -93,12 +93,12 @@ This repository hosts **Catanatron**, a high–performance Settlers of Catan sim
   - [x] Strategic hints (threat, position, discard risk)
 
 4. **Add AI/bot recommendations**
-   - [ ] Call AlphaBeta/MCTS at depth 1-2 for action evaluation
-   - [ ] Add weights/scores to available_actions
-   - [ ] Add top-2 moves to `bot_predictions`
+   - [x] Call AlphaBeta/MCTS at depth 1-2 for action evaluation
+   - [x] Add weights/scores to available_actions
+   - [x] Add top-2 moves to `bot_predictions`
 
 5. **Document analytics structure**
-   - [ ] Describe the `analytics` field structure for frontend/bots
+   - [x] Describe the `analytics` field structure for frontend/bots
 
 6. **Extensions**
    - [ ] Add heatmap/tensor features for the board (optional)
