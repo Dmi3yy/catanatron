@@ -236,12 +236,19 @@ def _bot_evaluations(game: Any, my_color, depth: int = 1):
     player = AlphaBetaPlayer(my_color, depth=depth, prunning=True)
     root = DebugStateNode("root", my_color)
     deadline = time.time() + 5
-    player.alphabeta(game.copy(), depth, float("-inf"), float("inf"), deadline, root)
-    scores = {child.action: child.expected_value for child in root.children}
-    ranked = sorted(root.children, key=lambda c: c.expected_value, reverse=True)
-    predictions = [
-        {**_evaluate_action(c.action), "score": c.expected_value} for c in ranked[:2]
-    ]
+    try:
+        player.alphabeta(
+            game.copy(), depth, float("-inf"), float("inf"), deadline, root
+        )
+        scores = {child.action: child.expected_value for child in root.children}
+        ranked = sorted(root.children, key=lambda c: c.expected_value, reverse=True)
+        predictions = [
+            {**_evaluate_action(c.action), "score": c.expected_value}
+            for c in ranked[:2]
+        ]
+    except Exception:
+        scores = {}
+        predictions = []
     return scores, predictions
 
 
