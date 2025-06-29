@@ -26,6 +26,9 @@ def test_build_analytics_basic():
     first_action = analytics["available_actions"][0]
     assert "risk_level" in first_action
     assert "strategic_value" in first_action
+    assert "strategic_analysis" in analytics
+    sa = analytics["strategic_analysis"]
+    assert {"threat", "position", "discard_risk"}.issubset(sa)
 
 
 def test_webhook_player_sends_analytics():
@@ -73,8 +76,9 @@ def test_webhook_player_raises_on_error():
         "catanatron.models.player.requests.post",
         side_effect=requests.exceptions.Timeout,
     ) as mock_post:
-        with pytest.raises(requests.exceptions.Timeout):
-            bot.decide(game, game.state.playable_actions)
+        action = bot.decide(game, game.state.playable_actions)
+        assert mock_post.called
+        assert action == game.state.playable_actions[0]
 
 
 def test_settlement_and_city_recommendations():
