@@ -238,6 +238,44 @@ def _strategic_analysis(game: Any, my_color) -> Dict[str, Any]:
     }
 
 
+def _advanced_hints(game: Any, my_color) -> List[str]:
+    """Return extra strategic hints for the player."""
+    hints: List[str] = []
+    state = game.state
+    longest_owner = get_longest_road_color(state)
+    my_length = get_longest_road_length(state, my_color)
+    if longest_owner != my_color:
+        owner_len = (
+            get_longest_road_length(state, longest_owner)
+            if longest_owner is not None
+            else 0
+        )
+        if my_length + 1 >= owner_len and owner_len >= 5:
+            hints.append("Close to longest road")
+
+    army_owner, army_size = get_largest_army(state)
+    my_knights = get_played_dev_cards(state, my_color, "KNIGHT")
+    if army_owner != my_color and my_knights + 1 >= (army_size or 3):
+        hints.append("Close to largest army")
+
+    if get_actual_victory_points(state, my_color) >= 8:
+        hints.append("Near victory")
+    return hints
+
+
+def _action_history(game: Any, limit: int = 5) -> List[Dict[str, Any]]:
+    """Return the last few actions of the game."""
+    recent = game.state.actions[-limit:]
+    return [
+        {
+            "color": a.color.value,
+            "type": a.action_type.value,
+            "value": a.value,
+        }
+        for a in recent
+    ]
+
+
 def _bot_evaluations(game: Any, my_color, depth: int = 1):
     """Return action scores and top predicted moves using AlphaBeta search."""
     from catanatron.players.minimax import AlphaBetaPlayer, DebugStateNode
@@ -283,5 +321,7 @@ def build_analytics(game: Any, my_color: Any, playable_actions: List) -> Dict[st
         "city_recommendations": _city_recommendations(game, my_color),
         "strategic_analysis": _strategic_analysis(game, my_color),
         "bot_predictions": predictions,
+        "action_history": _action_history(game, 5),
+        "advanced_hints": _advanced_hints(game, my_color),
     }
     return analytics
