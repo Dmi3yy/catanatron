@@ -134,7 +134,10 @@ class Game:
         for accumulator in accumulators:
             accumulator.before(self)
         while self.winning_color() is None and self.state.num_turns < TURNS_LIMIT:
-            self.play_tick(decide_fn=decide_fn, accumulators=accumulators)
+            try:
+                self.play_tick(decide_fn=decide_fn, accumulators=accumulators)
+            except Exception as e:
+                print(f"[GAME ERROR] {e}")
         for accumulator in accumulators:
             accumulator.after(self)
         return self.winning_color()
