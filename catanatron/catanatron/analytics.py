@@ -135,7 +135,10 @@ def _board_summary(game: Any) -> Dict[str, Any]:
 
 def _board_tensor(game: Any, color) -> List[List[List[float]]]:
     """Return board tensor as nested lists for JSON serialization."""
-    from catanatron.gym.board_tensor_features import create_board_tensor
+    try:
+        from catanatron.gym.board_tensor_features import create_board_tensor
+    except ModuleNotFoundError:  # gym extras not installed
+        return []
 
     tensor = create_board_tensor(game, color)
     return tensor.tolist()
