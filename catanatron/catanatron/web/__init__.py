@@ -18,6 +18,7 @@ def create_app(test_config=None):
         SECRET_KEY=secret_key,
         SQLALCHEMY_DATABASE_URI=database_url,
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
+        SQLALCHEMY_ENGINE_OPTIONS={"pool_pre_ping": True},
     )
     if test_config is not None:
         app.config.update(test_config)
