@@ -12,6 +12,7 @@ from catanatron.state_functions import (
     player_num_resource_cards,
     get_dev_cards_in_hand,
     get_longest_road_color,
+    get_longest_road_length,
     get_largest_army,
     get_player_buildings,
 )
