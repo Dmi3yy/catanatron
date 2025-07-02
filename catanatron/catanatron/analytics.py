@@ -14,6 +14,7 @@ from catanatron.state_functions import (
     get_longest_road_color,
     get_longest_road_length,
     get_largest_army,
+    get_played_dev_cards,
     get_player_buildings,
 )
 from catanatron.models.map import number_probability
