@@ -6,7 +6,7 @@ data/
 profile.pstats
 catanatron-venv
 .DS_Store
-
+.idea
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
