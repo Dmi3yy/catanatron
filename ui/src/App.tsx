@@ -9,6 +9,7 @@ import HomePage from "./pages/HomePage";
 import { StateProvider } from "./store";
 
 import "./App.scss";
+import ReplayScreen from "./pages/ReplayScreen";
 
 const theme = createTheme({
   palette: {
@@ -26,7 +27,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <StateProvider>
         <SnackbarProvider
-          classes={{ containerRoot: ["snackbar-container"] }}
+          classes={{ containerRoot: "snackbar-container" }}
           maxSnack={1}
           autoHideDuration={1000}
           TransitionComponent={Fade}
@@ -39,10 +40,14 @@ function App() {
                 element={<GameScreen replayMode={true} />}
               />
               <Route
+                path="/replays/:gameId"
+                element={<ReplayScreen/>}
+              />
+              <Route
                 path="/games/:gameId"
                 element={<GameScreen replayMode={false} />}
               />
-              <Route path="/" exact={true} element={<HomePage />} />
+              <Route path="/" element={<HomePage />} />
             </Routes>
           </Router>
         </SnackbarProvider>
